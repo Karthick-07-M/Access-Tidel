@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <meta
+    name="description"
+    content="Access Tidel - Employee Access Tracker built with HTML, CSS, and Vanilla JavaScript"
+  />
+  <title>Access Tidel | Employee Access Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --bg-soft: #f4f2ec;
+      --surface: #ffffff;
+      --surface-2: #f7f5f0;
+      --surface-3: #eeebe4;
+      --surface-4: #e7e2d9;
+
+      --text: #26231f;
+      --text-soft: #5f5951;
+      --text-muted: #8a847a;
+
+      --border: #e6e0d7;
+      --border-strong: #d5cdc2;
+
+      --brand: #dc4c3e;
+      --brand-hover: #c74337;
+      --brand-soft: rgba(220, 76, 62, 0.10);
+
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #b42318;
+      --info: #1d4ed8;
+
+      --sidebar: #fbfaf7;
+      --overlay: rgba(20, 17, 14, 0.40);
+
+      --shadow: 0 10px 28px rgba(34, 29, 24, 0.06);
+      --shadow-soft: 0 4px 12px rgba(34, 29, 24, 0.05);
+      --shadow-hover: 0 10px 24px rgba(34, 29, 24, 0.08);
+
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+
+      --trans: 180ms cubic-bezier(.2,.8,.2,1);
+      --top-safe: max(16px, env(safe-area-inset-top));
+      --bottom-safe: max(16px, env(safe-area-inset-bottom));
+    }
+
+    body.dark-mode {
+      --bg: #171512;
+      --bg-soft: #1d1a17;
+      --surface: #23201c;
+      --surface-2: #2a2622;
+      --surface-3: #322d28;
+      --surface-4: #3a352f;
+
+      --text: #f7f4ef;
+      --text-soft: #cbc4b9;
+      --text-muted: #9d9588;
+
+      --border: #38342f;
+      --border-strong: #4b453d;
+
+      --sidebar: #1a1714;
+      --overlay: rgba(0, 0, 0, 0.48);
+
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      --shadow-soft: 0 10px 22px rgba(0, 0, 0, 0.18);
+      --shadow-hover: 0 16px 32px rgba(0, 0, 0, 0.22);
+
+      --brand-soft: rgba(220, 76, 62, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 278px minmax(0, 1fr);
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at top right, rgba(220, 76, 62, 0.05), transparent 26%),
+        linear-gradient(180deg, var(--bg-soft), var(--bg));
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px 10px;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--brand);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 800;
+      box-shadow: 0 10px 18px rgba(220, 76, 62, 0.16);
+      letter-spacing: -0.03em;
+    }
+
+    .brand-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      display: block;
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      font-size: 1.03rem;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+
+    .brand-copy p {
+      margin: 4px 0 0;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+    }
+
+    .sidebar-section-title {
+      padding: 0 10px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      display: grid;
+      gap: 4px;
+    }
+
+    .nav-item {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: background var(--trans), color var(--trans), transform var(--trans);
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-2);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .nav-item.active {
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .nav-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .nav-icon {
+      width: 18px;
+      display: inline-flex;
+      justify-content: center;
+      flex: 0 0 auto;
+      font-size: 0.95rem;
+    }
+
+    .nav-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.93rem;
+    }
+
+    .nav-count {
+      min-width: 24px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: inline-grid;
+      place-items: center;
+      color: var(--text-muted);
+      font-size: 0.73rem;
+      font-weight: 700;
+    }
+
+    .sidebar-card {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .sidebar-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.96rem;
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-card p {
+      margin: 0 0 12px;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ===== WORKSPACE ===== */
+    .workspace {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: calc(14px + var(--top-safe)) 22px 14px;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      flex: 0 0 auto;
+    }
+
+    .search {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 220px;
+    }
+
+    .search input {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 14px 0 42px;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+      transition: border-color var(--trans), box-shadow var(--trans), background var(--trans);
+    }
+
+    .search input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search input:focus {
+      border-color: color-mix(in srgb, var(--brand) 50%, var(--border));
+      box-shadow: 0 0 0 4px rgba(220, 76, 62, 0.12);
+    }
+
+    .search svg {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      width: 18px;
+      height: 18px;
+      transform: translateY(-50%);
+      fill: var(--text-muted);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: none;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition:
+        transform var(--trans),
+        background var(--trans),
+        color var(--trans),
+        box-shadow var(--trans),
+        border-color var(--trans),
+        opacity var(--trans);
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid rgba(220, 76, 62, 0.20);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(220, 76, 62, 0.18);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    .btn-danger {
+      background: #fef3f2;
+      color: var(--danger);
+      border: 1px solid rgba(180, 35, 24, 0.12);
+      box-shadow: none;
+    }
+
+    body.dark-mode .btn-danger {
+      background: rgba(180, 35, 24, 0.14);
+      color: #ff9188;
+      border-color: rgba(255, 145, 136, 0.16);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-soft);
+      border: 1px solid var(--border-strong);
+    }
+
+    .select {
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .content {
+      padding: 24px 22px calc(26px + var(--bottom-safe));
+      min-width: 0;
+    }
+
+    /* ===== HERO ===== */
+    .hero-panel {
+      background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--surface-2)));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 22px;
+      align-items: center;
+    }
+
+    .hero-copy h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 1.35rem + 1.4vw, 2.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      font-weight: 800;
+    }
+
+    .hero-copy p {
+      margin: 10px 0 0;
+      color: var(--text-soft);
+      max-width: 58ch;
+      line-height: 1.56;
+      font-size: 0.98rem;
+    }
+
+    .hero-kpis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .kpi {
+      padding: 15px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .kpi span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .kpi strong {
+      font-size: 1.45rem;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    /* ===== SECTION CARD ===== */
+    .section-card {
+      margin-top: 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-size: 1.16rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--text-soft);
+      font-size: 0.94rem;
+      line-height: 1.5;
+      max-width: 60ch;
+    }
+
+    .section-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .records-wrap {
+      padding-top: 8px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 20px 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .status-meta strong {
+      color: var(--text);
+    }
+
+    .segmented {
+      display: inline-flex;
+      padding: 4px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background var(--trans), color var(--trans), box-shadow var(--trans);
+    }
+
+    .segmented button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* ===== TABLE ===== */
+    .list-table-wrap {
+      overflow: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 13px 20px;
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 96%, transparent);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      font-weight: 800;
+    }
+
+    tbody td {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: background var(--trans);
+    }
+
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--brand-soft) 42%, var(--surface));
+    }
+
+    .record-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .record-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 2px solid var(--brand);
+      flex: 0 0 auto;
+    }
+
+    .record-text {
+      min-width: 0;
+    }
+
+    .record-text strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+
+    .record-text small {
+      color: var(--text-muted);
+      font-size: 0.81rem;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .table-actions,
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .table-btn {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    /* ===== BOARD ===== */
+    .board {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      padding: 0 20px 20px;
+    }
+
+    .record-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+    }
+
+    .record-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .record-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .record-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border: 1px solid rgba(220, 76, 62, 0.16);
+    }
+
+    .record-card h4 {
+      margin: 0;
+      font-size: 1.03rem;
+      letter-spacing: -0.02em;
+    }
+
+    .record-card p {
+      margin: 0;
+      color: var(--text-soft);
+      line-height: 1.5;
+      font-size: 0.92rem;
+      word-break: break-word;
+    }
+
+    /* ===== EMPTY ===== */
+    .empty {
+      padding: 42px 20px 30px;
+      text-align: center;
+      color: var(--text-soft);
+    }
+
+    .empty strong {
+      display: block;
+      color: var(--text);
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ===== OVERLAY + MOBILE SIDEBAR ===== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      backdrop-filter: blur(4px);
+      z-index: 80;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--trans);
+    }
+
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-mobile {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: min(88vw, 320px);
+      height: 100dvh;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transform: translateX(-105%);
+      transition: transform var(--trans);
+      z-index: 90;
+      overflow-y: auto;
+      padding: calc(16px + var(--top-safe)) 16px calc(16px + var(--bottom-safe));
+    }
+
+    .sidebar-mobile.show {
+      transform: translateX(0);
+    }
+
+    /* ===== MODALS ===== */
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: var(--overlay);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-root.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(560px, 100%);
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 1.22rem;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-head p {
+      margin: 6px 0 0;
+      color: var(--text-soft);
+      font-size: 0.94rem;
+      line-height: 1.45;
+      max-width: 44ch;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: background var(--trans), transform var(--trans);
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-3);
+      transform: translateY(-1px);
+    }
+
+    .modal-body {
+      padding: 20px 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .field small {
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      line-height: 1.4;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+      transition: border-color var(--trans), box-shadow var(--trans), background var(--trans);
+    }
+
+    .field input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field input:focus {
+      border-color: color-mix(in srgb, var(--brand) 52%, var(--border));
+      box-shadow: 0 0 0 4px rgba(220, 76, 62, 0.12);
+    }
+
+    .field input[aria-invalid="true"] {
+      border-color: rgba(180, 35, 24, 0.5);
+      background: rgba(180, 35, 24, 0.05);
+    }
+
+    .error-text {
+      min-height: 16px;
+      margin: 0;
+      color: var(--danger);
+      font-size: 0.83rem;
+    }
+
+    .modal-foot {
+      padding: 16px 22px 22px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ===== TOASTS ===== */
+    .toast-region {
+      position: fixed;
+      top: calc(16px + var(--top-safe));
+      right: 16px;
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(360px, calc(100vw - 32px));
+    }
+
+    .toast {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 14px 15px;
+      border-radius: 16px;
+      color: white;
+      box-shadow: var(--shadow);
+      transform: translateX(18px);
+      opacity: 0;
+      animation: toastIn 0.22s ease forwards;
+    }
+
+    .toast.success { background: linear-gradient(135deg, #1f9d63, #127b4c); }
+    .toast.error   { background: linear-gradient(135deg, #d92d20, #a31610); }
+    .toast.warning { background: linear-gradient(135deg, #d97706, #9a5a0a); }
+    .toast.info    { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+    .toast button {
+      background: transparent;
+      color: inherit;
+      border: none;
+      font-size: 1.15rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .toast.removing {
+      animation: toastOut 0.2s ease forwards;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+      white-space: nowrap;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(18px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(16px); }
+    }
+
+    @media (max-width: 1100px) {
+      .hero-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: inline-grid;
+        place-items: center;
+      }
+
+      .sidebar-mobile {
+        display: block;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        padding-inline: 16px;
+      }
+
+      .content {
+        padding-inline: 16px;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .topbar-actions .btn,
+      .topbar-actions .select,
+      .segmented {
+        flex: 1 1 0;
+      }
+
+      .hero-kpis {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        padding: 16px;
+      }
+
+      .status-bar {
+        padding-inline: 16px;
+      }
+
+      .board {
+        padding-inline: 16px;
+      }
+
+      .modal-foot .btn {
+        flex: 1 1 180px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        gap: 10px;
+      }
+
+      .search {
+        min-width: 100%;
+        order: 2;
+      }
+
+      .topbar-actions {
+        order: 3;
+      }
+
+      .hero-panel {
+        padding: 18px;
+      }
+
+      .modal-head,
+      .modal-body,
+      .modal-foot {
+        padding-inline: 16px;
+      }
+
+      .segmented {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .segmented button {
+        flex: 1 1 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Desktop sidebar -->
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <div class="brand-badge"><img src="Logo.png" alt="Access Tidel logo"></div>
+        <div class="brand-copy">
+          <h1>Access Tidel</h1>
+          <p>Access tracker, simplified</p>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">Views</div>
+      <nav class="sidebar-nav" id="sidebarNavDesktop">
+        <button type="button" class="nav-item active" data-view="inbox">
+          <span class="nav-left"><span class="nav-icon">📥</span><span class="nav-label">Inbox</span></span>
+          <span class="nav-count" id="countInboxDesktop">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="today">
+          <span class="nav-left"><span class="nav-icon">📅</span><span class="nav-label">Today</span></span>
+          <span class="nav-count" id="countTodayDesktop">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="all">
+          <span class="nav-left"><span class="nav-icon">🗂️</span><span class="nav-label">All Records</span></span>
+          <span class="nav-count" id="countAllDesktop">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="updated">
+          <span class="nav-left"><span class="nav-icon">🕒</span><span class="nav-label">Recently Updated</span></span>
+          <span class="nav-count" id="countUpdatedDesktop">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-section-title">Capture</div>
+      <button type="button" class="btn btn-primary" id="sidebarQuickAddBtn">Add Record</button>
+
+      <div class="sidebar-card">
+        <h3>Focused workflow</h3>
+        <p>
+          Capture access entries into <strong>Inbox</strong>, review recent work in <strong>Today</strong>,
+          and manage the complete list without clutter.
+        </p>
+        <button type="button" class="btn btn-secondary" id="sidebarDownloadBtn">Export visible PDF</button>
+      </div>
+    </aside>
+
+    <!-- Mobile sidebar -->
+    <aside class="sidebar-mobile" id="mobileSidebar" aria-label="Mobile navigation">
+      <div class="brand">
+        <div class="brand-badge"><img src="Logo.png" alt="Access Tidel logo"></div>
+        <div class="brand-copy">
+          <h1>Access Tidel</h1>
+          <p>Access tracker, simplified</p>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">Views</div>
+      <nav class="sidebar-nav" id="sidebarNavMobile">
+        <button type="button" class="nav-item active" data-view="inbox">
+          <span class="nav-left"><span class="nav-icon">📥</span><span class="nav-label">Inbox</span></span>
+          <span class="nav-count" id="countInboxMobile">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="today">
+          <span class="nav-left"><span class="nav-icon">📅</span><span class="nav-label">Today</span></span>
+          <span class="nav-count" id="countTodayMobile">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="all">
+          <span class="nav-left"><span class="nav-icon">🗂️</span><span class="nav-label">All Records</span></span>
+          <span class="nav-count" id="countAllMobile">0</span>
+        </button>
+        <button type="button" class="nav-item" data-view="updated">
+          <span class="nav-left"><span class="nav-icon">🕒</span><span class="nav-label">Recently Updated</span></span>
+          <span class="nav-count" id="countUpdatedMobile">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-section-title">Capture</div>
+      <button type="button" class="btn btn-primary" id="mobileQuickAddBtn">Add Record</button>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 2a6 6 0 1 0 0 12A6 6 0 0 0 10 4Zm7.71 12.29 4 4-1.42 1.42-4-4 1.42-1.42Z"/>
+          </svg>
+          <label class="sr-only" for="searchInput">Search employee records</label>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search by name, employee ID, or access card number"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="topbar-actions">
+          <select id="sortSelect" class="select" aria-label="Sort records">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="emp-asc">Employee ID A–Z</option>
+            <option value="emp-desc">Employee ID Z–A</option>
+          </select>
+
+          <div class="segmented" role="tablist" aria-label="Layout selector">
+            <button type="button" class="active" id="listViewBtn" aria-selected="true">List</button>
+            <button type="button" id="boardViewBtn" aria-selected="false">Board</button>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="quickAddBtn">Add</button>
+          <button type="button" class="btn btn-secondary" id="themeToggleBtn">Theme</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="hero-panel">
+          <div class="hero-copy">
+            <h2 id="heroTitle">Inbox</h2>
+            <p id="heroDescription">
+              Capture access records quickly, review today’s entries, and manage the complete access list from one focused workspace.
+            </p>
+          </div>
+
+          <div class="hero-kpis">
+            <div class="kpi">
+              <span>Total Records</span>
+              <strong id="kpiTotal">0</strong>
+            </div>
+            <div class="kpi">
+              <span>Visible in View</span>
+              <strong id="kpiVisible">0</strong>
+            </div>
+            <div class="kpi">
+              <span>Created Today</span>
+              <strong id="kpiToday">0</strong>
+            </div>
+            <div class="kpi">
+              <span>Layout</span>
+              <strong id="kpiLayout">List</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <h3>Employee Access Records</h3>
+              <p>Browse the current view, sort results, update records, export the visible list, or reset stored data.</p>
+            </div>
+
+            <div class="section-tools">
+              <button type="button" class="btn btn-secondary" id="clearSearchBtn">Clear Search</button>
+              <button type="button" class="btn btn-secondary" id="downloadPdfBtn">Download PDF</button>
+              <button type="button" class="btn btn-danger" id="resetAppBtn">Reset</button>
+            </div>
+          </div>
+
+          <div class="records-wrap">
+            <div class="status-bar" aria-live="polite">
+              <div class="status-meta">
+                <span>Active view: <strong id="statusView">Inbox</strong></span>
+                <span>Total records: <strong id="statusTotal">0</strong></span>
+                <span>Visible records: <strong id="statusVisible">0</strong></span>
+                <span>Sort: <strong id="statusSort">Newest</strong></span>
+              </div>
+            </div>
+
+            <div id="emptyState" class="empty" hidden>
+              <strong>No employee records found.</strong>
+              <span>Add a record or adjust your current filters and search terms.</span>
+            </div>
+
+            <div id="listContainer" class="list-table-wrap">
+              <table aria-describedby="statusView">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Employee ID</th>
+                    <th>Access Card Number</th>
+                    <th>Created</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recordsTableBody"></tbody>
+              </table>
+            </div>
+
+            <div id="boardContainer" class="board" hidden></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="overlay" id="pageOverlay" hidden></div>
+
+  <!-- Record modal -->
+  <div class="modal-root" id="recordModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="recordModalTitle">Add Record</h3>
+          <p id="recordModalText">Capture a new employee access entry quickly.</p>
+        </div>
+        <button type="button" class="icon-btn" id="closeRecordModalBtn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="employeeForm" novalidate>
+        <input type="hidden" id="recordId" />
+
+        <div class="modal-body">
+          <div class="field">
+            <label for="name">Name</label>
+            <small>Enter the employee full name.</small>
+            <input type="text" id="name" name="name" maxlength="60" placeholder="e.g. Karthick Muthuveeran" />
+            <p class="error-text" id="nameError" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="employeeId">Employee ID</label>
+            <small>Letters, numbers, and hyphen are allowed.</small>
+            <input type="text" id="employeeId" name="employeeId" maxlength="24" placeholder="e.g. EMP1024" />
+            <p class="error-text" id="employeeIdError" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="cardNumber">Access Card Number</label>
+            <small>Use the physical access card number.</small>
+            <input type="text" id="cardNumber" name="cardNumber" maxlength="24" placeholder="e.g. AC-778312" />
+            <p class="error-text" id="cardNumberError" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" id="clearFormBtn">Clear</button>
+          <button type="button" class="btn btn-secondary" id="cancelEditBtn" hidden>Cancel Edit</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div class="modal-root" id="confirmModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="confirmTitle">Confirm action</h3>
+          <p id="confirmText">Are you sure?</p>
+        </div>
+        <button type="button" class="icon-btn" id="closeConfirmModalBtn" aria-label="Close confirm modal">✕</button>
+      </div>
+
+      <div class="modal-foot" style="border-top:none; padding-top: 0;">
+        <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="false"></aside>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'access-tidel-records-v3';
+      const THEME_KEY = 'access-tidel-theme-v3';
+
+      const state = {
+        records: [],
+        search: '',
+        sortBy: 'newest',
+        layout: window.matchMedia('(max-width: 760px)').matches ? 'board' : 'list',
+        filterView: 'inbox',
+        pendingConfirm: null
+      };
+
+      const els = {
+        searchInput: document.getElementById('searchInput'),
+        clearSearchBtn: document.getElementById('clearSearchBtn'),
+        sortSelect: document.getElementById('sortSelect'),
+        listViewBtn: document.getElementById('listViewBtn'),
+        boardViewBtn: document.getElementById('boardViewBtn'),
+        quickAddBtn: document.getElementById('quickAddBtn'),
+        sidebarQuickAddBtn: document.getElementById('sidebarQuickAddBtn'),
+        mobileQuickAddBtn: document.getElementById('mobileQuickAddBtn'),
+        themeToggleBtn: document.getElementById('themeToggleBtn'),
+        downloadPdfBtn: document.getElementById('downloadPdfBtn'),
+        sidebarDownloadBtn: document.getElementById('sidebarDownloadBtn'),
+        resetAppBtn: document.getElementById('resetAppBtn'),
+
+        statusView: document.getElementById('statusView'),
+        statusTotal: document.getElementById('statusTotal'),
+        statusVisible: document.getElementById('statusVisible'),
+        statusSort: document.getElementById('statusSort'),
+
+        kpiTotal: document.getElementById('kpiTotal'),
+        kpiVisible: document.getElementById('kpiVisible'),
+        kpiToday: document.getElementById('kpiToday'),
+        kpiLayout: document.getElementById('kpiLayout'),
+
+        heroTitle: document.getElementById('heroTitle'),
+        heroDescription: document.getElementById('heroDescription'),
+
+        recordsTableBody: document.getElementById('recordsTableBody'),
+        boardContainer: document.getElementById('boardContainer'),
+        listContainer: document.getElementById('listContainer'),
+        emptyState: document.getElementById('emptyState'),
+
+        sidebarNavDesktop: document.getElementById('sidebarNavDesktop'),
+        sidebarNavMobile: document.getElementById('sidebarNavMobile'),
+        mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+        mobileSidebar: document.getElementById('mobileSidebar'),
+        pageOverlay: document.getElementById('pageOverlay'),
+
+        countInboxDesktop: document.getElementById('countInboxDesktop'),
+        countTodayDesktop: document.getElementById('countTodayDesktop'),
+        countAllDesktop: document.getElementById('countAllDesktop'),
+        countUpdatedDesktop: document.getElementById('countUpdatedDesktop'),
+        countInboxMobile: document.getElementById('countInboxMobile'),
+        countTodayMobile: document.getElementById('countTodayMobile'),
+        countAllMobile: document.getElementById('countAllMobile'),
+        countUpdatedMobile: document.getElementById('countUpdatedMobile'),
+
+        recordModal: document.getElementById('recordModal'),
+        closeRecordModalBtn: document.getElementById('closeRecordModalBtn'),
+        recordModalTitle: document.getElementById('recordModalTitle'),
+        recordModalText: document.getElementById('recordModalText'),
+        employeeForm: document.getElementById('employeeForm'),
+        recordId: document.getElementById('recordId'),
+        name: document.getElementById('name'),
+        employeeId: document.getElementById('employeeId'),
+        cardNumber: document.getElementById('cardNumber'),
+        submitBtn: document.getElementById('submitBtn'),
+        clearFormBtn: document.getElementById('clearFormBtn'),
+        cancelEditBtn: document.getElementById('cancelEditBtn'),
+        nameError: document.getElementById('nameError'),
+        employeeIdError: document.getElementById('employeeIdError'),
+        cardNumberError: document.getElementById('cardNumberError'),
+
+        confirmModal: document.getElementById('confirmModal'),
+        confirmTitle: document.getElementById('confirmTitle'),
+        confirmText: document.getElementById('confirmText'),
+        closeConfirmModalBtn: document.getElementById('closeConfirmModalBtn'),
+        confirmCancelBtn: document.getElementById('confirmCancelBtn'),
+        confirmOkBtn: document.getElementById('confirmOkBtn'),
+
+        toastRegion: document.getElementById('toastRegion')
+      };
+
+      const fieldMeta = [
+        { key: 'name', input: els.name, error: els.nameError },
+        { key: 'employeeId', input: els.employeeId, error: els.employeeIdError },
+        { key: 'cardNumber', input: els.cardNumber, error: els.cardNumberError }
+      ];
+
+      const VIEW_META = {
+        inbox: {
+          title: 'Inbox',
+          description: 'Capture and review every access record in one focused default view.'
+        },
+        today: {
+          title: 'Today',
+          description: 'Focus only on records created today to process fresh access updates faster.'
+        },
+        all: {
+          title: 'All Records',
+          description: 'Audit the entire access register, search deeply, and maintain a clean source of truth.'
+        },
+        updated: {
+          title: 'Recently Updated',
+          description: 'See records updated recently so edits and corrections stay visible.'
+        }
+      };
+
+      const SORT_LABELS = {
+        newest: 'Newest',
+        oldest: 'Oldest',
+        'name-asc': 'Name A–Z',
+        'name-desc': 'Name Z–A',
+        'emp-asc': 'Employee ID A–Z',
+        'emp-desc': 'Employee ID Z–A'
+      };
+
+      const sanitize = (value) => String(value ?? '').trim().replace(/\s+/g, ' ');
+
+      const escapeHtml = (value) =>
+        String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+      const generateId = () => `rec_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+
+      function saveRecords() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records));
+      }
+
+      function loadRecords() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          state.records = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(state.records)) state.records = [];
+        } catch (error) {
+          console.error('Failed to load records', error);
+          state.records = [];
+          toast('Stored data was corrupted and has been reset.', 'warning');
+        }
+      }
+
+      function setTheme(theme) {
+        const isDark = theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDark);
+        els.themeToggleBtn.textContent = isDark ? 'Light' : 'Dark';
+      }
+
+      function loadTheme() {
+        const theme = localStorage.getItem(THEME_KEY) || 'light';
+        setTheme(theme);
+      }
+
+      function toggleTheme() {
+        const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        setTheme(nextTheme);
+        localStorage.setItem(THEME_KEY, nextTheme);
+        toast(`Switched to ${nextTheme} mode.`, 'info');
+      }
+
+      function formatDate(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '—';
+        return new Intl.DateTimeFormat('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(date);
+      }
+
+      function isSameLocalDay(dateA, dateB) {
+        return (
+          dateA.getFullYear() === dateB.getFullYear() &&
+          dateA.getMonth() === dateB.getMonth() &&
+          dateA.getDate() === dateB.getDate()
+        );
+      }
+
+      function getTodayCount() {
+        const now = new Date();
+        return state.records.filter((record) => {
+          const created = new Date(record.createdAt);
+          return !Number.isNaN(created.getTime()) && isSameLocalDay(created, now);
+        }).length;
+      }
+
+      function getUpdatedCount() {
+        const now = Date.now();
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        return state.records.filter((record) => {
+          const updated = new Date(record.updatedAt || record.createdAt).getTime();
+          return !Number.isNaN(updated) && (now - updated <= sevenDays);
+        }).length;
+      }
+
+      function getViewCount(view) {
+        switch (view) {
+          case 'today':
+            return getTodayCount();
+          case 'updated':
+            return getUpdatedCount();
+          case 'all':
+          case 'inbox':
+          default:
+            return state.records.length;
+        }
+      }
+
+      function validateForm(values) {
+        const errors = {};
+
+        if (!values.name) {
+          errors.name = 'Name is required.';
+        } else if (values.name.length < 2) {
+          errors.name = 'Name must be at least 2 characters.';
+        }
+
+        if (!values.employeeId) {
+          errors.employeeId = 'Employee ID is required.';
+        } else if (!/^[A-Za-z0-9-]+$/.test(values.employeeId)) {
+          errors.employeeId = 'Use letters, numbers, or hyphen only.';
+        }
+
+        if (!values.cardNumber) {
+          errors.cardNumber = 'Access Card Number is required.';
+        } else if (!/^[A-Za-z0-9-]+$/.test(values.cardNumber)) {
+          errors.cardNumber = 'Use letters, numbers, or hyphen only.';
+        }
+
+        return errors;
+      }
+
+      function showValidation(errors = {}) {
+        fieldMeta.forEach((field) => {
+          const message = errors[field.key] || '';
+          field.error.textContent = message;
+          field.input.setAttribute('aria-invalid', message ? 'true' : 'false');
+        });
+      }
+
+      function getFormData() {
+        return {
+          name: sanitize(els.name.value),
+          employeeId: sanitize(els.employeeId.value),
+          cardNumber: sanitize(els.cardNumber.value)
+        };
+      }
+
+      function clearForm() {
+        els.employeeForm.reset();
+        els.recordId.value = '';
+        showValidation();
+        setEditMode(false);
+      }
+
+      function setEditMode(isEditing) {
+        els.recordModalTitle.textContent = isEditing ? 'Edit Record' : 'Add Record';
+        els.recordModalText.textContent = isEditing
+          ? 'Update the employee access details and save the changes.'
+          : 'Capture a new employee access entry quickly.';
+        els.submitBtn.textContent = isEditing ? 'Update Record' : 'Save Record';
+        els.cancelEditBtn.hidden = !isEditing;
+      }
+
+      function openRecordModal(isEditing = false) {
+        setEditMode(isEditing);
+        els.recordModal.classList.add('show');
+        els.recordModal.setAttribute('aria-hidden', 'false');
+        if (!isEditing) {
+          clearForm();
+        }
+        requestAnimationFrame(() => els.name.focus());
+      }
+
+      function closeRecordModal() {
+        els.recordModal.classList.remove('show');
+        els.recordModal.setAttribute('aria-hidden', 'true');
+      }
+
+      function openConfirmModal({ title, message, actionLabel = 'Confirm', onConfirm }) {
+        state.pendingConfirm = onConfirm;
+        els.confirmTitle.textContent = title;
+        els.confirmText.textContent = message;
+        els.confirmOkBtn.textContent = actionLabel;
+        els.confirmModal.classList.add('show');
+        els.confirmModal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeConfirmModal() {
+        els.confirmModal.classList.remove('show');
+        els.confirmModal.setAttribute('aria-hidden', 'true');
+        state.pendingConfirm = null;
+      }
+
+      function toast(message, type = 'success', duration = 3200) {
+        const node = document.createElement('div');
+        node.className = `toast ${type}`;
+        node.setAttribute('role', 'status');
+        node.innerHTML = `<span>${escapeHtml(message)}</span>`;
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.setAttribute('aria-label', 'Dismiss notification');
+        closeBtn.textContent = '×';
+        closeBtn.addEventListener('click', () => removeToast(node));
+
+        node.appendChild(closeBtn);
+        els.toastRegion.appendChild(node);
+
+        window.setTimeout(() => removeToast(node), duration);
+      }
+
+      function removeToast(node) {
+        if (!node || node.classList.contains('removing')) return;
+        node.classList.add('removing');
+        node.addEventListener('animationend', () => node.remove(), { once: true });
+      }
+
+      function toggleMobileSidebar(show) {
+        const shouldShow = typeof show === 'boolean'
+          ? show
+          : !els.mobileSidebar.classList.contains('show');
+
+        els.mobileSidebar.classList.toggle('show', shouldShow);
+        els.pageOverlay.classList.toggle('show', shouldShow);
+        els.pageOverlay.hidden = !shouldShow;
+      }
+
+      function applyView(view) {
+        state.filterView = view;
+        render();
+        toggleMobileSidebar(false);
+      }
+
+      function matchesCurrentView(record) {
+        const now = new Date();
+
+        switch (state.filterView) {
+          case 'today': {
+            const created = new Date(record.createdAt);
+            return !Number.isNaN(created.getTime()) && isSameLocalDay(created, now);
+          }
+          case 'updated': {
+            const updated = new Date(record.updatedAt || record.createdAt).getTime();
+            return !Number.isNaN(updated) && (Date.now() - updated <= 7 * 24 * 60 * 60 * 1000);
+          }
+          case 'all':
+          case 'inbox':
+          default:
+            return true;
+        }
+      }
+
+      function getVisibleRecords() {
+        const query = state.search.toLowerCase();
+
+        const filtered = state.records.filter((record) => {
+          const matchesSearch =
+            !query ||
+            [record.name, record.employeeId, record.cardNumber]
+              .some((value) => String(value).toLowerCase().includes(query));
+
+          return matchesSearch && matchesCurrentView(record);
+        });
+
+        const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
+
+        switch (state.sortBy) {
+          case 'oldest':
+            filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            break;
+          case 'name-asc':
+            filtered.sort((a, b) => collator.compare(a.name, b.name));
+            break;
+          case 'name-desc':
+            filtered.sort((a, b) => collator.compare(b.name, a.name));
+            break;
+          case 'emp-asc':
+            filtered.sort((a, b) => collator.compare(a.employeeId, b.employeeId));
+            break;
+          case 'emp-desc':
+            filtered.sort((a, b) => collator.compare(b.employeeId, a.employeeId));
+            break;
+          default:
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        return filtered;
+      }
+
+      function renderSidebarCounts() {
+        const inbox = getViewCount('inbox');
+        const today = getViewCount('today');
+        const all = getViewCount('all');
+        const updated = getViewCount('updated');
+
+        els.countInboxDesktop.textContent = inbox;
+        els.countTodayDesktop.textContent = today;
+        els.countAllDesktop.textContent = all;
+        els.countUpdatedDesktop.textContent = updated;
+
+        els.countInboxMobile.textContent = inbox;
+        els.countTodayMobile.textContent = today;
+        els.countAllMobile.textContent = all;
+        els.countUpdatedMobile.textContent = updated;
+      }
+
+      function renderSidebarSelection() {
+        document.querySelectorAll('[data-view]').forEach((node) => {
+          node.classList.toggle('active', node.dataset.view === state.filterView);
+        });
+      }
+
+      function renderHero(visibleRecords) {
+        const meta = VIEW_META[state.filterView] || VIEW_META.inbox;
+        els.heroTitle.textContent = meta.title;
+        els.heroDescription.textContent = meta.description;
+        els.kpiTotal.textContent = String(state.records.length);
+        els.kpiVisible.textContent = String(visibleRecords.length);
+        els.kpiToday.textContent = String(getTodayCount());
+        els.kpiLayout.textContent = state.layout === 'list' ? 'List' : 'Board';
+
+        els.statusView.textContent = meta.title;
+        els.statusTotal.textContent = String(state.records.length);
+        els.statusVisible.textContent = String(visibleRecords.length);
+        els.statusSort.textContent = SORT_LABELS[state.sortBy] || 'Newest';
+      }
+
+      function renderList(records) {
+        els.recordsTableBody.innerHTML = records.map((record, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>
+              <div class="record-title">
+                <span class="record-dot" aria-hidden="true"></span>
+                <div class="record-text">
+                  <strong>${escapeHtml(record.name)}</strong>
+                  <small>Access entry</small>
+                </div>
+              </div>
+            </td>
+            <td class="mono">${escapeHtml(record.employeeId)}</td>
+            <td class="mono">${escapeHtml(record.cardNumber)}</td>
+            <td>${escapeHtml(formatDate(record.createdAt))}</td>
+            <td>${escapeHtml(formatDate(record.updatedAt || record.createdAt))}</td>
+            <td>
+              <div class="table-actions">
+                <button type="button" class="btn btn-secondary table-btn" data-edit-id="${record.id}">Edit</button>
+                <button type="button" class="btn btn-danger table-btn" data-delete-id="${record.id}">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function renderBoard(records) {
+        els.boardContainer.innerHTML = records.map((record) => `
+          <article class="record-card">
+            <div class="record-card-header">
+              <div class="record-chip">Access Entry</div>
+              <span class="mono">${escapeHtml(record.employeeId)}</span>
+            </div>
+
+            <div>
+              <h4>${escapeHtml(record.name)}</h4>
+            </div>
+
+            <p><strong>Employee ID:</strong> <span class="mono">${escapeHtml(record.employeeId)}</span></p>
+            <p><strong>Card Number:</strong> <span class="mono">${escapeHtml(record.cardNumber)}</span></p>
+            <p><strong>Created:</strong> ${escapeHtml(formatDate(record.createdAt))}</p>
+            <p><strong>Updated:</strong> ${escapeHtml(formatDate(record.updatedAt || record.createdAt))}</p>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-secondary table-btn" data-edit-id="${record.id}">Edit</button>
+              <button type="button" class="btn btn-danger table-btn" data-delete-id="${record.id}">Delete</button>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      function updateLayoutUI() {
+        const listMode = state.layout === 'list';
+        els.listViewBtn.classList.toggle('active', listMode);
+        els.boardViewBtn.classList.toggle('active', !listMode);
+        els.listViewBtn.setAttribute('aria-selected', String(listMode));
+        els.boardViewBtn.setAttribute('aria-selected', String(!listMode));
+        els.listContainer.hidden = !listMode;
+        els.boardContainer.hidden = listMode;
+      }
+
+      function render() {
+        const visibleRecords = getVisibleRecords();
+
+        renderSidebarCounts();
+        renderSidebarSelection();
+        renderHero(visibleRecords);
+        updateLayoutUI();
+
+        const hasData = visibleRecords.length > 0;
+        els.emptyState.hidden = hasData;
+        els.listContainer.hidden = !hasData || state.layout !== 'list';
+        els.boardContainer.hidden = !hasData || state.layout !== 'board';
+
+        if (!hasData) {
+          els.recordsTableBody.innerHTML = '';
+          els.boardContainer.innerHTML = '';
+        } else {
+          renderList(visibleRecords);
+          renderBoard(visibleRecords);
+        }
+      }
+
+      function startEdit(id) {
+        const record = state.records.find((item) => item.id === id);
+        if (!record) return;
+
+        els.recordId.value = record.id;
+        els.name.value = record.name;
+        els.employeeId.value = record.employeeId;
+        els.cardNumber.value = record.cardNumber;
+        showValidation();
+        openRecordModal(true);
+      }
+
+      function deleteRecord(id) {
+        const record = state.records.find((item) => item.id === id);
+        if (!record) return;
+
+        openConfirmModal({
+          title: 'Delete record',
+          message: `Delete the record for ${record.name}? This action cannot be undone.`,
+          actionLabel: 'Delete',
+          onConfirm: () => {
+            state.records = state.records.filter((item) => item.id !== id);
+            saveRecords();
+            render();
+            if (els.recordId.value === id) clearForm();
+            closeConfirmModal();
+            toast(`Deleted record for ${record.name}.`, 'error');
+          }
+        });
+      }
+
+      function handleRecordActions(event) {
+        const editId = event.target.closest('[data-edit-id]')?.dataset.editId;
+        if (editId) {
+          startEdit(editId);
+          return;
+        }
+
+        const deleteId = event.target.closest('[data-delete-id]')?.dataset.deleteId;
+        if (deleteId) {
+          deleteRecord(deleteId);
+        }
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        const values = getFormData();
+        const errors = validateForm(values);
+        showValidation(errors);
+
+        if (Object.keys(errors).length) {
+          toast('Please complete all required fields correctly.', 'warning');
+          return;
+        }
+
+        const existingId = els.recordId.value;
+        const duplicate = state.records.some((item) =>
+          (
+            item.employeeId.toLowerCase() === values.employeeId.toLowerCase() ||
+            item.cardNumber.toLowerCase() === values.cardNumber.toLowerCase()
+          ) && item.id !== existingId
+        );
+
+        if (duplicate) {
+          toast('Employee ID or Access Card Number already exists.', 'error');
+          return;
+        }
+
+        if (existingId) {
+          state.records = state.records.map((item) =>
+            item.id === existingId
+              ? { ...item, ...values, updatedAt: new Date().toISOString() }
+              : item
+          );
+          saveRecords();
+          render();
+          closeRecordModal();
+          toast(`Updated record for ${values.name}.`, 'success');
+        } else {
+          state.records.unshift({
+            id: generateId(),
+            ...values,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+          saveRecords();
+          render();
+          closeRecordModal();
+          toast(`Added record for ${values.name}.`, 'success');
+        }
+
+        clearForm();
+      }
+
+      function resetApplication() {
+        if (!state.records.length) {
+          toast('There are no records to reset.', 'info');
+          return;
+        }
+
+        openConfirmModal({
+          title: 'Reset application',
+          message: 'This will clear every stored record from localStorage. Continue?',
+          actionLabel: 'Reset Now',
+          onConfirm: () => {
+            state.records = [];
+            localStorage.removeItem(STORAGE_KEY);
+            clearForm();
+            render();
+            closeConfirmModal();
+            toast('Application data reset successfully.', 'warning');
+          }
+        });
+      }
+
+      async function downloadPDF() {
+        const records = getVisibleRecords();
+
+        if (!records.length) {
+          toast('No visible records to export.', 'warning');
+          return;
+        }
+
+        const jsPDFGlobal = window.jspdf && window.jspdf.jsPDF;
+        if (!jsPDFGlobal) {
+          toast('PDF library could not be loaded.', 'error');
+          return;
+        }
+
+        try {
+          const doc = new jsPDFGlobal({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const margin = 12;
+          let y = 18;
+
+          doc.setFillColor(250, 249, 246);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+          doc.setFillColor(220, 76, 62);
+          doc.roundedRect(margin, 10, pageWidth - (margin * 2), 18, 4, 4, 'F');
+
+          doc.setTextColor(255, 255, 255);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(18);
+          doc.text('Access Tidel', margin + 5, 21);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(`View: ${VIEW_META[state.filterView]?.title || 'Inbox'}`, margin + 5, 26);
+
+          y = 36;
+          doc.setTextColor(40, 40, 40);
+          doc.setFontSize(9.5);
+          doc.text(
+            `Generated: ${new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}`,
+            margin,
+            y
+          );
+          doc.text(`Visible Records: ${records.length}`, pageWidth - margin, y, { align: 'right' });
+
+          y += 10;
+
+          const headers = ['#', 'Name', 'Employee ID', 'Card Number', 'Created'];
+          const colX = [margin, 22, 88, 128, 168];
+
+          const drawHeader = () => {
+            doc.setFillColor(236, 232, 225);
+            doc.roundedRect(margin, y - 5.5, pageWidth - margin * 2, 9, 2, 2, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(70, 70, 70);
+            doc.setFontSize(8.5);
+            headers.forEach((text, idx) => doc.text(text, colX[idx], y));
+            y += 7;
+          };
+
+          drawHeader();
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.2);
+
+          records.forEach((record, index) => {
+            if (y > pageHeight - 16) {
+              doc.addPage();
+              doc.setFillColor(250, 249, 246);
+              doc.rect(0, 0, pageWidth, pageHeight, 'F');
+              y = 18;
+              drawHeader();
+            }
+
+            if (index % 2 === 0) {
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin, y - 4.8, pageWidth - margin * 2, 7, 'F');
+            }
+
+            doc.setTextColor(40, 40, 40);
+            doc.text(String(index + 1), colX[0], y);
+            doc.text(String(record.name).slice(0, 30), colX[1], y);
+            doc.text(String(record.employeeId).slice(0, 18), colX[2], y);
+            doc.text(String(record.cardNumber).slice(0, 18), colX[3], y);
+            doc.text(
+              new Intl.DateTimeFormat('en-IN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(record.createdAt)),
+              colX[4],
+              y
+            );
+
+            y += 7;
+          });
+
+          doc.setTextColor(120, 120, 120);
+          doc.text('© 2026 Accenture. All rights reserved.', pageWidth / 2, pageHeight - 8, { align: 'center' });
+
+          doc.save(`access-tidel-${state.filterView}-${new Date().toISOString().slice(0, 10)}.pdf`);
+          toast('PDF downloaded successfully.', 'success');
+        } catch (error) {
+          console.error(error);
+          toast('Unable to create the PDF. Please try again.', 'error');
+        }
+      }
+
+      function attachEvents() {
+        els.searchInput.addEventListener('input', (event) => {
+          state.search = sanitize(event.target.value);
+          render();
+        });
+
+        els.clearSearchBtn.addEventListener('click', () => {
+          els.searchInput.value = '';
+          state.search = '';
+          render();
+          els.searchInput.focus();
+        });
+
+        els.sortSelect.addEventListener('change', (event) => {
+          state.sortBy = event.target.value;
+          render();
+        });
+
+        els.listViewBtn.addEventListener('click', () => {
+          state.layout = 'list';
+          render();
+        });
+
+        els.boardViewBtn.addEventListener('click', () => {
+          state.layout = 'board';
+          render();
+        });
+
+        [els.quickAddBtn, els.sidebarQuickAddBtn, els.mobileQuickAddBtn].forEach((btn) => {
+          btn.addEventListener('click', () => {
+            clearForm();
+            openRecordModal(false);
+          });
+        });
+
+        els.themeToggleBtn.addEventListener('click', toggleTheme);
+
+        [els.downloadPdfBtn, els.sidebarDownloadBtn].forEach((btn) => {
+          btn.addEventListener('click', downloadPDF);
+        });
+
+        els.resetAppBtn.addEventListener('click', resetApplication);
+
+        els.mobileMenuBtn.addEventListener('click', () => toggleMobileSidebar(true));
+        els.pageOverlay.addEventListener('click', () => toggleMobileSidebar(false));
+
+        document.querySelectorAll('[data-view]').forEach((node) => {
+          node.addEventListener('click', () => applyView(node.dataset.view));
+        });
+
+        els.recordsTableBody.addEventListener('click', handleRecordActions);
+        els.boardContainer.addEventListener('click', handleRecordActions);
+
+        els.employeeForm.addEventListener('submit', handleSubmit);
+
+        els.clearFormBtn.addEventListener('click', () => {
+          clearForm();
+          toast('Form cleared.', 'info');
+        });
+
+        els.cancelEditBtn.addEventListener('click', () => {
+          clearForm();
+          openRecordModal(false);
+        });
+
+        els.closeRecordModalBtn.addEventListener('click', () => {
+          closeRecordModal();
+        });
+
+        els.closeConfirmModalBtn.addEventListener('click', closeConfirmModal);
+        els.confirmCancelBtn.addEventListener('click', closeConfirmModal);
+
+        els.confirmOkBtn.addEventListener('click', () => {
+          const action = state.pendingConfirm;
+          if (typeof action === 'function') {
+            action();
+          }
+        });
+
+        fieldMeta.forEach((field) => {
+          field.input.addEventListener('input', () => {
+            if (field.input.getAttribute('aria-invalid') === 'true') {
+              showValidation(validateForm(getFormData()));
+            }
+          });
+        });
+
+        window.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            toggleMobileSidebar(false);
+            closeConfirmModal();
+            closeRecordModal();
+          }
+        });
+
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 900) {
+            toggleMobileSidebar(false);
+          }
+          if (window.matchMedia('(max-width: 760px)').matches && state.layout === 'list') {
+            // keep chosen layout; no forced switch
+          }
+        });
+      }
+
+      function init() {
+        loadRecords();
+        loadTheme();
+        attachEvents();
+        render();
+
+        els.sortSelect.value = state.sortBy;
+        setEditMode(false);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
